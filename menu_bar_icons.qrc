@@ -1,0 +1,22 @@
+<RCC>
+    <qresource prefix="/menubar/direction">
+        <file>Resources/my_icons/direction/bottom-1.png</file>
+        <file>Resources/my_icons/direction/bottom-2.png</file>
+        <file>Resources/my_icons/direction/left.1.png</file>
+        <file>Resources/my_icons/direction/left.2.png</file>
+        <file>Resources/my_icons/direction/right.1.png</file>
+        <file>Resources/my_icons/direction/right.2.png</file>
+        <file>Resources/my_icons/direction/top.1.png</file>
+        <file>Resources/my_icons/direction/top.2.png</file>
+    </qresource>
+    <qresource prefix="/menubar/view-mode">
+        <file>Resources/my_icons/view_mode/icon_view/icon_view.png</file>
+        <file>Resources/my_icons/view_mode/icon_view/icon_view_inverted.png</file>
+        <file>Resources/my_icons/view_mode/column_view/column_view_inverted.png</file>
+        <file>Resources/my_icons/view_mode/column_view/column_view.png</file>
+        <file>Resources/my_icons/view_mode/list_View/list_view_1.png</file>
+        <file>Resources/my_icons/view_mode/list_View/list_view_2.png</file>
+        <file>Resources/my_icons/view_mode/tree_view/tree-1.png</file>
+        <file>Resources/my_icons/view_mode/tree_view/tree-2.png</file>
+    </qresource>
+</RCC>
