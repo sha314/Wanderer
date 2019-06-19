@@ -27,6 +27,10 @@ CONFIG += c++11
 SOURCES += \
         copypasteoperation.cpp \
         fileconflict.cpp \
+        form/columnviewform.cpp \
+        form/iconviewform.cpp \
+        form/listviewform.cpp \
+        form/treeviewform.cpp \
         list_files_folders.cpp \
         main.cpp \
         mainwindow.cpp
@@ -34,12 +38,21 @@ SOURCES += \
 HEADERS += \
         copypasteoperation.h \
         fileconflict.h \
+        form/columnviewform.h \
+        form/iconviewform.h \
+        form/listviewform.h \
+        form/treeviewform.h \
         list_files_folders.h \
-        mainwindow.h
+        mainwindow.h \
+        src/view/viewmodes.h
 
 FORMS += \
         copypasteoperation.ui \
         fileconflict.ui \
+        form/columnviewform.ui \
+        form/iconviewform.ui \
+        form/listviewform.ui \
+        form/treeviewform.ui \
         mainwindow.ui
 
 # Default rules for deployment.

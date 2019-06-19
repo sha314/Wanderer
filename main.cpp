@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
     w.show();
 
     auto path = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
-    list_all(path);
+//    list_all(path);
 //    list_favorites();
 //    list_devices();
 //    list_storage();

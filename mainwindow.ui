@@ -16,10 +16,10 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
-     <widget class="QGraphicsView" name="graphicsViewPlaces"/>
+     <widget class="QTreeView" name="treeView"/>
     </item>
     <item>
-     <widget class="QGraphicsView" name="graphicsViewFoldersAndFiles"/>
+     <widget class="QListView" name="listView"/>
     </item>
    </layout>
   </widget>
@@ -406,6 +406,7 @@
     <iconset>
      <normalon>:/menubar/view-mode/Resources/my_icons/view_mode/tree_view/tree-1.png</normalon>
      <activeon>:/menubar/view-mode/Resources/my_icons/view_mode/tree_view/tree-2.png</activeon>
+     <selectedon>:/menubar/view-mode/Resources/my_icons/view_mode/tree_view/tree-2.png</selectedon>
     </iconset>
    </property>
    <property name="text">
