@@ -1,13 +1,15 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "src/sidebar/sidebar.h"
+
 #include <QMainWindow>
 #include <QFileSystemModel>
 
-#include <form/columnviewform.h>
-#include <form/listviewform.h>
-#include <form/iconviewform.h>
-#include <form/treeviewform.h>
+//#include <form/columnviewform.h>
+//#include <form/listviewform.h>
+//#include <form/iconviewform.h>
+//#include <form/treeviewform.h>
 
 #include <src/view/viewmodes.h>
 
@@ -23,11 +25,11 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    void inforLayout();// information about the layout. to find bugs
+
 private slots:
     void on_actionPrevious_triggered();
-
     void on_actionNext_triggered();
-
     void on_actionParent_triggered();
 
 
@@ -44,10 +46,8 @@ private:
     QFileSystemModel *dirmodel;
     QFileSystemModel *filemodel;
 
-    ColumnViewForm cvf;
-    TreeViewForm tvf;
-    ListViewForm lvf;
-    IconViewForm ivf;
+    QWidget *navigation_panel;
+    QWidget *sidebar;
 
     ViewMode currentViewMode;
 
@@ -58,7 +58,11 @@ private:
     int max_column_width = 64*4;
     int min_column_width = 64*2;
 
-    QWidget *current_widget;
+
+    SideBar *widget_sidebar;
+
+    void initializeSideBar(); // todo
+    void initializeNavigationPanel();
 
 };
 

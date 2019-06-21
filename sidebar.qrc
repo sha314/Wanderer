@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/sidebar">
+        <file>Resources/sidebar/icon2.png</file>
+        <file>Resources/sidebar/icon1.png</file>
+        <file>Resources/sidebar/icon0.png</file>
+    </qresource>
+</RCC>

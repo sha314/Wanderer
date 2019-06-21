@@ -3,9 +3,11 @@
 #include <QDebug>
 #include <QStandardPaths>
 #include <iostream>
-#include <QTreeWidget>
 
-#include<QColumnView>
+#include <QTreeWidget>
+#include <QColumnView>
+#include <QTableView>
+#include <QListView>
 
 using namespace  std;
 
@@ -16,7 +18,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     // added by shahnoor
-    currentViewMode = ViewMode::IconView;
+
+    qDebug() << "__LINE__ " << __LINE__ ;
+
+    initializeSideBar();
+    initializeNavigationPanel(); // current view mode is set inside
+
 
 //    QStringList fileNames{"Fvorite", "Devices", "Network"};
 //    QTreeWidget treeWidget;
@@ -45,15 +52,24 @@ MainWindow::MainWindow(QWidget *parent) :
 //    dirmodel = new QFileSystemModel(this);
 //    dirmodel->setRootPath(root_path);
 
-    current_widget = ui->listView;
-
-
+//    current_widget = ui->listView;
 
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+    delete dirmodel;
+    delete filemodel;
+    delete navigation_panel;
+    delete sidebar;
+    delete widget_sidebar;
+}
+
+void MainWindow::inforLayout()
+{
+    int elements = ui->horizontalLayout->count();
+    qDebug() << elements << " in " << ui->horizontalLayout;
 }
 
 void MainWindow::on_actionPrevious_triggered()
@@ -76,52 +92,53 @@ void MainWindow::on_actionTreeView_triggered()
 {
     qDebug() << "on_actionTreeView_triggered " << __LINE__;
 //    cvf.show();
-    if (currentViewMode != ViewMode::TreeView){
+    if (currentViewMode == ViewMode::TreeView){
         // no need to change view mode if it is already activated
-        currentViewMode = ViewMode::TreeView;
-
-
-        // add and remove widget in layout
-        qDebug() << " add and remove widget in layout " << __LINE__ ;
-    //    ui->treeView->setModel(dirmodel);
-        auto treeViewIndex = ui->horizontalLayout->indexOf(ui->treeView);
-        qDebug() << "treeViewIndex " << treeViewIndex;
-        auto listViewIndex = ui->horizontalLayout->indexOf(ui->listView);
-        qDebug() << "listViewIndex " << listViewIndex;
-
-        QTreeView * view_navigation = new QTreeView();
-        view_navigation->setObjectName(QString::fromUtf8("columnView"));
-
-    //    QWidget *column_view_widget = new QColumnView(this);
-    //    ui->horizontalLayout->removeWidget(ui->listView);
-          //Insert widget at new position
-    //    ui->horizontalLayout->insertWidget(listViewIndex , column_view_widget);
-
-        ui->horizontalLayout->replaceWidget(current_widget , view_navigation);
-
-
-        dirmodel = new QFileSystemModel(this);
-        QString current_location = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
-        dirmodel->setRootPath(current_location);
-
-        QModelIndex indx = dirmodel->index(current_location);
-        qDebug() << indx.data();
-        view_navigation->setRootIndex(indx);
-
-
-        //    column_widths.append(min_column_width);
-        //    ui->columnView->setColumnWidths(column_widths);
-
-        view_navigation->setModel(dirmodel);
-
-
-        current_widget = view_navigation;
-    }else{
         qDebug() << "already in the selected viewmode";
         return;
     }
+    inforLayout();
+    currentViewMode = ViewMode::TreeView;
+    // removel previous
+    ui->horizontalLayout->removeWidget(navigation_panel);
 
-    qDebug() << "on_actionTreeView_triggered" << __LINE__;
+    // add and remove widget in layout
+    qDebug() << " add and remove widget in layout " << __LINE__ ;
+
+
+    navigation_panel = new QWidget(this);
+
+    QTreeView *view_navigation = nullptr;
+
+
+    // add and remove widget in layout
+    qDebug() << " add and remove widget in layout " << __LINE__ ;
+
+
+    navigation_panel = new QTreeView();
+
+    view_navigation = dynamic_cast<QTreeView*> (navigation_panel);
+    qDebug() << "__LINE__" << __LINE__;
+    view_navigation->setObjectName(QString::fromUtf8("iconView"));
+
+    //    ui->widget_navigation_panel
+
+    dirmodel = new QFileSystemModel(this);
+
+    QString current_location = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+    dirmodel->setRootPath(current_location);
+//    dirmodel->setFilter(QDir::AllDirs | QDir::NoDotAndDotDot);
+    view_navigation->setModel(dirmodel);
+
+
+    view_navigation->setObjectName(QString::fromUtf8("columnView"));
+
+    // finally add the navigation panel
+    ui->horizontalLayout->addWidget(navigation_panel);
+
+
+    inforLayout();
+
     ui->actionTreeView->setChecked(true);
     ui->actionListView->setChecked(false);
     ui->actionIconView->setChecked(false);
@@ -132,48 +149,52 @@ void MainWindow::on_actionListView_triggered()
 {
     qDebug() << "on_actionListView_triggered " << __LINE__;
 //    cvf.show();
-    if (currentViewMode != ViewMode::ListView){
-        currentViewMode = ViewMode::ListView;
+    if (currentViewMode == ViewMode::ListView){
         // no need to change view mode if it is already activated
-        // add and remove widget in layout
-        qDebug() << " add and remove widget in layout " << __LINE__ ;
-    //    ui->treeView->setModel(dirmodel);
-        auto treeViewIndex = ui->horizontalLayout->indexOf(ui->treeView);
-        qDebug() << "treeViewIndex " << treeViewIndex;
-        auto listViewIndex = ui->horizontalLayout->indexOf(ui->listView);
-        qDebug() << "listViewIndex " << listViewIndex;
-
-        QListView * view_navigation = new QListView();
-        view_navigation->setObjectName(QString::fromUtf8("columnView"));
-
-    //    QWidget *column_view_widget = new QColumnView(this);
-    //    ui->horizontalLayout->removeWidget(ui->listView);
-          //Insert widget at new position
-    //    ui->horizontalLayout->insertWidget(listViewIndex , column_view_widget);
-
-        ui->horizontalLayout->replaceWidget(current_widget , view_navigation);
-
-
-        dirmodel = new QFileSystemModel(this);
-        QString current_location = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
-        dirmodel->setRootPath(current_location);
-
-        QModelIndex indx = dirmodel->index(current_location);
-        qDebug() << indx.data();
-        view_navigation->setRootIndex(indx);
-
-
-        //    column_widths.append(min_column_width);
-        //    ui->columnView->setColumnWidths(column_widths);
-
-        view_navigation->setModel(dirmodel);
-
-
-        current_widget = view_navigation;
-    }else{
         qDebug() << "already in the selected viewmode";
         return;
     }
+    currentViewMode = ViewMode::ListView;
+
+    inforLayout();
+    // removel previous
+    ui->horizontalLayout->removeWidget(navigation_panel);
+
+    // add and remove widget in layout
+    qDebug() << " add and remove widget in layout " << __LINE__ ;
+
+
+    navigation_panel = new QWidget(this);
+
+    QListView *view_navigation = nullptr;
+
+
+    // add and remove widget in layout
+    qDebug() << " add and remove widget in layout " << __LINE__ ;
+
+
+    navigation_panel = new QListView();
+
+    view_navigation = dynamic_cast<QListView*> (navigation_panel);
+    qDebug() << "__LINE__" << __LINE__;
+    view_navigation->setObjectName(QString::fromUtf8("iconView"));
+
+    //    ui->widget_navigation_panel
+
+    dirmodel = new QFileSystemModel(this);
+
+    QString current_location = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+    dirmodel->setRootPath(current_location);
+//    dirmodel->setFilter(QDir::AllDirs | QDir::NoDotAndDotDot);
+    view_navigation->setModel(dirmodel);
+
+
+    view_navigation->setObjectName(QString::fromUtf8("columnView"));
+
+    // finally add the navigation panel
+    ui->horizontalLayout->addWidget(navigation_panel);
+
+    inforLayout();
 
     ui->actionTreeView->setChecked(false);
     ui->actionListView->setChecked(true);
@@ -184,6 +205,44 @@ void MainWindow::on_actionListView_triggered()
 void MainWindow::on_actionIconView_triggered()
 {
     qDebug() << "on_actionIconView_triggered " << __LINE__;
+    if (currentViewMode == ViewMode::IconView) {
+        // no need to change view mode if it is already activated
+        qDebug() << "already in the selected viewmode";
+        return;
+    }
+    currentViewMode = ViewMode::IconView;
+    inforLayout();
+
+    // removel previous
+    ui->horizontalLayout->removeWidget(navigation_panel);
+    // add and remove widget in layout
+    navigation_panel = new QWidget(this);
+
+    // add and remove widget in layout
+    qDebug() << " add and remove widget in layout " << __LINE__ ;
+
+    QTableView * view_navigation = nullptr;
+    navigation_panel = new QTableView();
+
+    view_navigation = dynamic_cast<QTableView*> (navigation_panel);
+    qDebug() << "__LINE__" << __LINE__;
+    view_navigation->setObjectName(QString::fromUtf8("iconView"));
+
+//    ui->widget_navigation_panel
+
+    dirmodel = new QFileSystemModel(this);
+
+    QString current_location = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+    dirmodel->setRootPath(current_location);
+//    dirmodel->setFilter(QDir::AllDirs | QDir::NoDotAndDotDot);
+    view_navigation->setModel(dirmodel);
+
+
+    // finally add the navigation panel
+    ui->horizontalLayout->addWidget(navigation_panel);
+
+    inforLayout();
+
     ui->actionTreeView->setChecked(false);
     ui->actionListView->setChecked(false);
     ui->actionIconView->setChecked(true);
@@ -193,59 +252,116 @@ void MainWindow::on_actionIconView_triggered()
 void MainWindow::on_actionColumnView_triggered()
 {
     qDebug() << "on_actionColumnView_triggered " << __LINE__;
-    if (currentViewMode != ViewMode::ColumnView){
-        currentViewMode = ViewMode::ColumnView;
-        // add and remove widget in layout
-        qDebug() << " add and remove widget in layout " << __LINE__ ;
-    //    ui->treeView->setModel(dirmodel);
-        auto treeViewIndex = ui->horizontalLayout->indexOf(ui->treeView);
-        qDebug() << "treeViewIndex " << treeViewIndex;
-        auto listViewIndex = ui->horizontalLayout->indexOf(ui->listView);
-        qDebug() << "listViewIndex " << listViewIndex;
-
-        QColumnView * view_navigation = new QColumnView();
-
-        view_navigation->setObjectName(QString::fromUtf8("columnView"));
-
-    //    QWidget *column_view_widget = new QColumnView(this);
-    //    ui->horizontalLayout->removeWidget(ui->listView);
-          //Insert widget at new position
-    //    ui->horizontalLayout->insertWidget(listViewIndex , column_view_widget);
-
-//        ui->horizontalLayout->replaceWidget(ui->listView , view_navigation);
-        ui->horizontalLayout->replaceWidget(current_widget , view_navigation);
-
-
-        dirmodel = new QFileSystemModel(this);
-        QString current_location = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
-        dirmodel->setRootPath(current_location);
-
-        QModelIndex indx = dirmodel->index(current_location);
-        qDebug() << indx.data();
-        view_navigation->setRootIndex(indx);
-
-
-        //    column_widths.append(min_column_width);
-        //    ui->columnView->setColumnWidths(column_widths);
-
-        view_navigation->setModel(dirmodel);
-        auto widths = view_navigation->columnWidths();
-        foreach (int a, widths) {
-            qDebug() << a;
-        }
-        column_widths.append(min_column_width);
-        view_navigation->setColumnWidths(column_widths);
-
-        current_widget = view_navigation;
-
-    }else{
+    if (currentViewMode == ViewMode::ColumnView){
+        // no need to change view mode if it is already activated
         qDebug() << "already in the selected viewmode";
         return;
     }
+
+    currentViewMode = ViewMode::ColumnView;
+
+    inforLayout();
+
+    // removel previous
+    ui->horizontalLayout->removeWidget(navigation_panel);
+
+    // add and remove widget in layout
+    qDebug() << " add and remove widget in layout " << __LINE__ ;
+
+
+    navigation_panel = new QWidget(this);
+    QColumnView *view_navigation = nullptr;
+
+
+    // add and remove widget in layout
+    qDebug() << " add and remove widget in layout " << __LINE__ ;
+
+
+    navigation_panel = new QColumnView();
+
+    view_navigation = dynamic_cast<QColumnView*> (navigation_panel);
+    qDebug() << "__LINE__" << __LINE__;
+    view_navigation->setObjectName(QString::fromUtf8("iconView"));
+
+    //    ui->widget_navigation_panel
+
+    dirmodel = new QFileSystemModel(this);
+
+    QString current_location = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+    dirmodel->setRootPath(current_location);
+//    dirmodel->setFilter(QDir::AllDirs | QDir::NoDotAndDotDot);
+    view_navigation->setModel(dirmodel);
+
+
+    auto widths = view_navigation->columnWidths();
+    foreach (int a, widths) {
+        qDebug() << a;
+    }
+    column_widths.append(min_column_width);
+    view_navigation->setColumnWidths(column_widths);
+
+    view_navigation->setObjectName(QString::fromUtf8("columnView"));
+
+    // finally add the navigation panel
+    ui->horizontalLayout->addWidget(navigation_panel);
+
+
+    inforLayout();
+
     ui->actionTreeView->setChecked(false);
     ui->actionListView->setChecked(false);
     ui->actionIconView->setChecked(false);
     ui->actionColumnView->setChecked(true);
+}
+
+void MainWindow::initializeSideBar()
+{
+    qDebug() << "initializeSideBar " << __LINE__;
+    sidebar = new SideBar(this);
+    ui->horizontalLayout->addWidget(sidebar);
+    qDebug() << "__LINE__" << __LINE__;
+//    for (int i = 0; i < 3; ++i)
+//      widget_sidebar->addAction(QString("Action %1").arg(i),
+//                                QIcon(QString(":/sidebar/Resources/icon%1").arg(i)));
+}
+
+void MainWindow::initializeNavigationPanel()
+{
+    qDebug() << "initializeNavigationPanel " << __LINE__;
+    /*
+     * Navigation panel consists of two parts mainly.
+     * On to side -> an address bar which indicates the current directory location
+     * view panel -> items on the address bar is shown here
+     *
+     */
+
+    //    navigation_panel = new NavigationPanel(this); // will be added later
+    navigation_panel = new QWidget(this);
+
+    currentViewMode = ViewMode::IconView;
+    // add and remove widget in layout
+    qDebug() << " add and remove widget in layout " << __LINE__ ;
+
+    QTableView * view_navigation = nullptr;
+    navigation_panel = new QTableView();
+
+    view_navigation = dynamic_cast<QTableView*> (navigation_panel);
+    qDebug() << "__LINE__" << __LINE__;
+    view_navigation->setObjectName(QString::fromUtf8("iconView"));
+
+//    ui->widget_navigation_panel
+
+    dirmodel = new QFileSystemModel(this);
+
+    QString current_location = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+    dirmodel->setRootPath(current_location);
+//    dirmodel->setFilter(QDir::AllDirs | QDir::NoDotAndDotDot);
+    view_navigation->setModel(dirmodel);
+
+
+    // finally add the navigation panel
+    ui->horizontalLayout->addWidget(navigation_panel);
+
 }
 
 
