@@ -100,6 +100,7 @@ void MainWindow::on_actionTreeView_triggered()
     inforLayout();
     currentViewMode = ViewMode::TreeView;
     // removel previous
+    navigation_panel->setParent(nullptr);
     ui->horizontalLayout->removeWidget(navigation_panel);
 
     // add and remove widget in layout
@@ -133,6 +134,14 @@ void MainWindow::on_actionTreeView_triggered()
 
     view_navigation->setObjectName(QString::fromUtf8("columnView"));
 
+    // set properties of the panel
+    view_navigation->resizeColumnToContents(0);
+    view_navigation->setColumnWidth(0, 200);
+
+    // monitoring clicks on item
+    connect(view_navigation, SIGNAL(clicked(const QModelIndex &)), this, SLOT(onTableClicked(const QModelIndex &)));
+
+
     // finally add the navigation panel
     ui->horizontalLayout->addWidget(navigation_panel);
 
@@ -158,6 +167,7 @@ void MainWindow::on_actionListView_triggered()
 
     inforLayout();
     // removel previous
+    navigation_panel->setParent(nullptr);
     ui->horizontalLayout->removeWidget(navigation_panel);
 
     // add and remove widget in layout
@@ -191,6 +201,10 @@ void MainWindow::on_actionListView_triggered()
 
     view_navigation->setObjectName(QString::fromUtf8("columnView"));
 
+    // monitoring clicks on item
+    connect(view_navigation, SIGNAL(clicked(const QModelIndex &)), this, SLOT(onTableClicked(const QModelIndex &)));
+
+
     // finally add the navigation panel
     ui->horizontalLayout->addWidget(navigation_panel);
 
@@ -214,6 +228,7 @@ void MainWindow::on_actionIconView_triggered()
     inforLayout();
 
     // removel previous
+    navigation_panel->setParent(nullptr);
     ui->horizontalLayout->removeWidget(navigation_panel);
     // add and remove widget in layout
     navigation_panel = new QWidget(this);
@@ -236,6 +251,9 @@ void MainWindow::on_actionIconView_triggered()
     dirmodel->setRootPath(current_location);
 //    dirmodel->setFilter(QDir::AllDirs | QDir::NoDotAndDotDot);
     view_navigation->setModel(dirmodel);
+
+    // monitoring clicks on item
+    connect(view_navigation, SIGNAL(clicked(const QModelIndex &)), this, SLOT(onTableClicked(const QModelIndex &)));
 
 
     // finally add the navigation panel
@@ -263,6 +281,7 @@ void MainWindow::on_actionColumnView_triggered()
     inforLayout();
 
     // removel previous
+    navigation_panel->setParent(nullptr);
     ui->horizontalLayout->removeWidget(navigation_panel);
 
     // add and remove widget in layout
@@ -301,6 +320,10 @@ void MainWindow::on_actionColumnView_triggered()
     view_navigation->setColumnWidths(column_widths);
 
     view_navigation->setObjectName(QString::fromUtf8("columnView"));
+
+    // monitoring clicks on item
+    connect(view_navigation, SIGNAL(clicked(const QModelIndex &)), this, SLOT(onTableClicked(const QModelIndex &)));
+
 
     // finally add the navigation panel
     ui->horizontalLayout->addWidget(navigation_panel);
@@ -366,4 +389,11 @@ void MainWindow::initializeNavigationPanel()
 
 
 
-
+void MainWindow::onTableClicked(const QModelIndex &index)
+{
+    qDebug() << "onTableClicked " << __LINE__;
+    if (index.isValid()) {
+        QString cellText = index.data().toString();
+        qDebug() << cellText;
+    }
+}

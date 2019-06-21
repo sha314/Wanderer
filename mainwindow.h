@@ -39,6 +39,8 @@ private slots:
     void on_actionColumnView_triggered();
 
 
+    void onTableClicked(const QModelIndex &index);
+
 private:
     Ui::MainWindow *ui;
 
