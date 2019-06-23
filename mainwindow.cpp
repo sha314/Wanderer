@@ -173,20 +173,23 @@ void MainWindow::on_actionListView_triggered()
     qDebug() << " add and remove widget in layout " << __LINE__ ;
 
 
-    navigation_panel = new QWidget(this);
+//    navigation_panel = new QWidget(this);
+    navigation_panel = new QTableView();
 
-    QListView *view_navigation = nullptr;
+    QTableView *view_navigation = nullptr;
 
 
     // add and remove widget in layout
     qDebug() << " add and remove widget in layout " << __LINE__ ;
 
 
-    navigation_panel = new QListView();
 
-    view_navigation = dynamic_cast<QListView*> (navigation_panel);
+
+    view_navigation = dynamic_cast<QTableView*> (navigation_panel);
     qDebug() << "__LINE__" << __LINE__;
-    view_navigation->setObjectName(QString::fromUtf8("iconView"));
+    view_navigation->setObjectName(QString::fromUtf8("listView"));
+    view_navigation->setShowGrid(false);
+
 
     //    ui->widget_navigation_panel
 
@@ -199,12 +202,27 @@ void MainWindow::on_actionListView_triggered()
     view_navigation->setModel(file_system_model);
     file_system_model->setRootPath(current_location); // must be called after setModel is called
     view_navigation->setRootIndex(file_system_model->index(current_location));
-
-
-    view_navigation->setObjectName(QString::fromUtf8("columnView"));
+//    view_navigation->setViewMode(QListView::ListMode);
 
     // monitoring clicks on item
     connect(view_navigation, SIGNAL(clicked(const QModelIndex &)), this, SLOT(onTableClicked(const QModelIndex &)));
+
+    // column properties must be set after root index is set
+    view_navigation->setColumnWidth(0, 256);
+    view_navigation->setColumnWidth(1, 12);
+//    view_navigation->setVerticalHeader(nullptr);
+//    view_navigation->hideColumn(0);
+
+
+
+    // dialog setup... directly from internet
+//    view_navigation->setSelectionMode(QAbstractItemView::SingleSelection  QAbstractItemView::MultiSelection); // todo
+//    view_navigation->setSelectionBehavior(QAbstractItemView::SelectRows);
+//    view_navigation->setEditTriggers(QAbstractItemView::DoubleClicked);
+//    view_navigation->setDragEnabled(true);
+//    view_navigation->setDragDropMode(QAbstractItemView::InternalMove);
+//    view_navigation->setDropIndicatorShown(true);
+//    view_navigation->viewport()->setAcceptDrops(true);
 
 
     // finally add the navigation panel
@@ -226,26 +244,40 @@ void MainWindow::on_actionIconView_triggered()
         qDebug() << "already in the selected viewmode";
         return;
     }
+    qDebug() << "on_actionListView_triggered " << __LINE__;
     currentViewMode = ViewMode::IconView;
-    inforLayout();
 
+    inforLayout();
     // removel previous
     navigation_panel->setParent(nullptr);
     ui->horizontalLayout->removeWidget(navigation_panel);
-    // add and remove widget in layout
-    navigation_panel = new QWidget(this);
 
     // add and remove widget in layout
     qDebug() << " add and remove widget in layout " << __LINE__ ;
 
-    QTableView * view_navigation = nullptr;
-    navigation_panel = new QTableView();
 
-    view_navigation = dynamic_cast<QTableView*> (navigation_panel);
+    navigation_panel = new QWidget(this);
+
+    QListView *view_navigation = nullptr;
+
+
+    // add and remove widget in layout
+    qDebug() << " add and remove widget in layout " << __LINE__ ;
+
+
+    navigation_panel = new QListView();
+
+    view_navigation = dynamic_cast<QListView*> (navigation_panel);
     qDebug() << "__LINE__" << __LINE__;
-    view_navigation->setObjectName(QString::fromUtf8("iconView"));
+    view_navigation->setObjectName(QString::fromUtf8("listView"));
+    view_navigation->setSpacing(0);
+    view_navigation->setGridSize(QSize(128, 128));
+    view_navigation->setIconSize(QSize(table_icon_size, table_icon_size));
+    view_navigation->setWrapping(true); // so that items are fitted in window. only scroll up or down
+    view_navigation->setMouseTracking(true);
 
-//    ui->widget_navigation_panel
+
+    //    ui->widget_navigation_panel
 
     file_system_model = new QFileSystemModel(this);
 
@@ -256,7 +288,7 @@ void MainWindow::on_actionIconView_triggered()
     view_navigation->setModel(file_system_model);
     file_system_model->setRootPath(current_location); // must be called after setModel is called
     view_navigation->setRootIndex(file_system_model->index(current_location));
-
+    view_navigation->setViewMode(QListView::IconMode);
 
     // monitoring clicks on item
     connect(view_navigation, SIGNAL(clicked(const QModelIndex &)), this, SLOT(onTableClicked(const QModelIndex &)));
@@ -268,11 +300,19 @@ void MainWindow::on_actionIconView_triggered()
     inforLayout();
 
     ui->actionTreeView->setChecked(false);
-    ui->actionListView->setChecked(false);
-    ui->actionIconView->setChecked(true);
+    ui->actionListView->setChecked(true);
+    ui->actionIconView->setChecked(false);
     ui->actionColumnView->setChecked(false);
 }
 
+/**
+ * @brief MainWindow::on_actionColumnView_triggered
+ *
+ * TODO:
+ *  (1) if a file is selected view its name, type, date modified, ... info in next column
+ *  (2) resize column according to (a) the name length of current directory + (b) max permitted size
+ *  (3) user resizable column
+ */
 void MainWindow::on_actionColumnView_triggered()
 {
     qDebug() << "on_actionColumnView_triggered " << __LINE__;
@@ -306,8 +346,8 @@ void MainWindow::on_actionColumnView_triggered()
 
     view_navigation = dynamic_cast<QColumnView*> (navigation_panel);
     qDebug() << "__LINE__" << __LINE__;
-    view_navigation->setObjectName(QString::fromUtf8("iconView"));
-
+    view_navigation->setObjectName(QString::fromUtf8("columnView"));
+    view_navigation->setIconSize(QSize(list_icon_size, list_icon_size));
     //    ui->widget_navigation_panel
 
     file_system_model = new QFileSystemModel(this);
@@ -326,7 +366,7 @@ void MainWindow::on_actionColumnView_triggered()
     foreach (int a, widths) {
         qDebug() << a;
     }
-    column_widths.append(min_column_width);
+    column_widths.append(max_column_width);
     view_navigation->setColumnWidths(column_widths);
 
     view_navigation->setObjectName(QString::fromUtf8("columnView"));
@@ -528,3 +568,19 @@ void MainWindow::setIconTheme()
 //    if (QIcon::hasThemeIcon("application-exit"))
 //        ui->action_Quit->setIcon(QIcon::fromTheme("application-exit"));
 }
+
+
+void MainWindow::model_directoryLoaded(QString path)
+{
+    qDebug() << "loaded" << path;
+//    model->sort(0, Qt::AscendingOrder);
+//    list->setCurrentIndex(model->index(0, 0, list->rootIndex()));
+}
+
+void MainWindow::changeRoot()
+{
+    qDebug() << "changeRoot";
+    /*model->setRootPath(rp + "/Desktop");
+    list->setRootIndex(model->index(rp + "/Desktop"))*/;
+}
+

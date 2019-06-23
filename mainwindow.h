@@ -13,6 +13,7 @@
 #include <QTableView>
 #include <QListView>
 
+
 #include <src/view/viewmodes.h>
 #include "src/sidebar/sidebar.h"
 
@@ -44,6 +45,11 @@ private slots:
 
     void onTableClicked(const QModelIndex &index);
 
+
+    void model_directoryLoaded(QString path);
+    void changeRoot(); // in case of icon view and list view
+//    void expandTo(QString next); // in case of tree view
+
 private:
     Ui::MainWindow *ui;
 
@@ -71,6 +77,10 @@ private:
     void setIconTheme();
     void initializeSideBar(); // todo
     void initializeNavigationPanel();
+
+    // icon sizes
+    int list_icon_size = 16*1;
+    int table_icon_size = 16*3;
 
 };
 
