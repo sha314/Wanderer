@@ -1,17 +1,20 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "src/sidebar/sidebar.h"
 
 #include <QMainWindow>
 #include <QFileSystemModel>
-
-//#include <form/columnviewform.h>
-//#include <form/listviewform.h>
-//#include <form/iconviewform.h>
-//#include <form/treeviewform.h>
+#include <QDirModel>
+#include <QDebug>
+#include <QStandardPaths>
+#include <iostream>
+#include <QTreeWidget>
+#include <QColumnView>
+#include <QTableView>
+#include <QListView>
 
 #include <src/view/viewmodes.h>
+#include "src/sidebar/sidebar.h"
 
 namespace Ui {
 class MainWindow;
@@ -45,8 +48,10 @@ private:
     Ui::MainWindow *ui;
 
     // added by shahnoor
-    QFileSystemModel *dirmodel;
-    QFileSystemModel *filemodel;
+    QString default_location ;
+
+    QFileSystemModel *file_system_model;
+    QDirModel *dir_model;
 
     QWidget *navigation_panel;
     QWidget *sidebar;
@@ -63,6 +68,7 @@ private:
 
     SideBar *widget_sidebar;
 
+    void setIconTheme();
     void initializeSideBar(); // todo
     void initializeNavigationPanel();
 

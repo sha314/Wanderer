@@ -2,6 +2,7 @@
 #include <QApplication>
 #include <QStandardPaths>
 #include "list_files_folders.h"
+#include <QDebug>
 
 int main(int argc, char *argv[])
 {
@@ -21,6 +22,10 @@ int main(int argc, char *argv[])
 //    list_storage();
 //    list_mont_points();
 //    list_os_type();
+
+    QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+//    QIcon::setThemeName("tango");
+     qDebug() << "QIcon::themeName() " << QIcon::themeName();
 
     return app.exec();
 }

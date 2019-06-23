@@ -1,0 +1,2 @@
+home folder : /usr/share/icons/ubuntu-mono-light/places/64
+
