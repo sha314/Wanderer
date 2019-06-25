@@ -86,6 +86,7 @@ void MainWindow::on_actionParent_triggered()
     cout << "on_actionParent_triggered : " << __LINE__ << endl;
 
     qDebug() << "update for icon view and list view only ?? todo ?? ";
+    current_dir_index = current_dir_index.parent();
 //    update_view_panel_on_actionParent_triggered();
     update_view_panel_all();
 }
@@ -603,7 +604,6 @@ void MainWindow::update_view_panel_all()
 
 void MainWindow::update_view_panel_on_actionParent_triggered()
 {
-    current_dir_index = current_dir_index.parent();
     if(currentViewMode == ViewMode::ListView ){
         QTableView *  tmp = dynamic_cast<QTableView*>(navigation_panel);
         // changing the directory according to clicked
