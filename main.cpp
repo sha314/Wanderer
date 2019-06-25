@@ -13,6 +13,7 @@ int main(int argc, char *argv[])
     QIcon icon(":/icon/Resources/my_icons/folder/folder.png");
     app.setWindowIcon(icon);
     MainWindow w;
+    // set QSizePolicy
     w.show();
 
     auto path = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);

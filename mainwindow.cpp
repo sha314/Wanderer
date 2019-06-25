@@ -11,12 +11,14 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     // added by shahnoor
-    default_location = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
-
+    default_location = QStandardPaths::writableLocation(QStandardPaths::HomeLocation); // does not change
+    current_location = QStandardPaths::writableLocation(QStandardPaths::HomeLocation); // changes according to need
+    current_root_path = "/"; // todo
     qDebug() << "__LINE__ " << __LINE__ ;
 
     qDebug() << QIcon::themeSearchPaths();
 
+    file_system_model = new QFileSystemModel(this); // set once
     setIconTheme();
     initializeSideBar();
     initializeNavigationPanel(); // current view mode is set inside
@@ -81,7 +83,11 @@ void MainWindow::on_actionNext_triggered()
 
 void MainWindow::on_actionParent_triggered()
 {
-    cout << "on_actionParent_triggered" << endl;
+    cout << "on_actionParent_triggered : " << __LINE__ << endl;
+
+    qDebug() << "update for icon view and list view only ?? todo ?? ";
+//    update_view_panel_on_actionParent_triggered();
+    update_view_panel_all();
 }
 
 
@@ -121,15 +127,11 @@ void MainWindow::on_actionTreeView_triggered()
 
     //    ui->widget_navigation_panel
 
-    file_system_model = new QFileSystemModel(this);
-
-    QString current_location = default_location;
-
 //    dirmodel->setFilter(QDir::AllDirs | QDir::NoDotAndDotDot);
 
     view_navigation->setModel(file_system_model);
-    file_system_model->setRootPath(current_location); // must be called after setModel is called
-    view_navigation->setRootIndex(file_system_model->index(current_location));
+    file_system_model->setRootPath(current_root_path); // must be called after setModel is called
+    view_navigation->setRootIndex(current_dir_index);
 
     view_navigation->setObjectName(QString::fromUtf8("columnView"));
 
@@ -139,7 +141,7 @@ void MainWindow::on_actionTreeView_triggered()
 
     // monitoring clicks on item
     connect(view_navigation, SIGNAL(clicked(const QModelIndex &)), this, SLOT(onTableClicked(const QModelIndex &)));
-
+    connect(view_navigation, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(onDoubleClicked(const QModelIndex &)));
 
     // finally add the navigation panel
     ui->horizontalLayout->addWidget(navigation_panel);
@@ -193,19 +195,17 @@ void MainWindow::on_actionListView_triggered()
 
     //    ui->widget_navigation_panel
 
-    file_system_model = new QFileSystemModel(this);
-
-    QString current_location = default_location;
 
 //    dirmodel->setFilter(QDir::AllDirs | QDir::NoDotAndDotDot);
 
     view_navigation->setModel(file_system_model);
-    file_system_model->setRootPath(current_location); // must be called after setModel is called
-    view_navigation->setRootIndex(file_system_model->index(current_location));
+    file_system_model->setRootPath(current_root_path); // must be called after setModel is called
+    view_navigation->setRootIndex(current_dir_index);
 //    view_navigation->setViewMode(QListView::ListMode);
 
     // monitoring clicks on item
     connect(view_navigation, SIGNAL(clicked(const QModelIndex &)), this, SLOT(onTableClicked(const QModelIndex &)));
+    connect(view_navigation, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(onDoubleClicked(const QModelIndex &)));
 
     // column properties must be set after root index is set
     view_navigation->setColumnWidth(0, 256);
@@ -236,6 +236,12 @@ void MainWindow::on_actionListView_triggered()
     ui->actionColumnView->setChecked(false);
 }
 
+/**
+ * @brief MainWindow::on_actionIconView_triggered
+ *
+ * TODO:
+ *  (1) remove the row number column
+ */
 void MainWindow::on_actionIconView_triggered()
 {
     qDebug() << "on_actionIconView_triggered " << __LINE__;
@@ -279,20 +285,18 @@ void MainWindow::on_actionIconView_triggered()
 
     //    ui->widget_navigation_panel
 
-    file_system_model = new QFileSystemModel(this);
 
-    QString current_location = default_location;
 
 //    dirmodel->setFilter(QDir::AllDirs | QDir::NoDotAndDotDot);
 
     view_navigation->setModel(file_system_model);
-    file_system_model->setRootPath(current_location); // must be called after setModel is called
-    view_navigation->setRootIndex(file_system_model->index(current_location));
+    file_system_model->setRootPath(current_root_path); // must be called after setModel is called
+    view_navigation->setRootIndex(current_dir_index);
     view_navigation->setViewMode(QListView::IconMode);
 
     // monitoring clicks on item
     connect(view_navigation, SIGNAL(clicked(const QModelIndex &)), this, SLOT(onTableClicked(const QModelIndex &)));
-
+    connect(view_navigation, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(onDoubleClicked(const QModelIndex &)));
 
     // finally add the navigation panel
     ui->horizontalLayout->addWidget(navigation_panel);
@@ -312,6 +316,7 @@ void MainWindow::on_actionIconView_triggered()
  *  (1) if a file is selected view its name, type, date modified, ... info in next column
  *  (2) resize column according to (a) the name length of current directory + (b) max permitted size
  *  (3) user resizable column
+ *  (4) automatically scroll to the last column
  */
 void MainWindow::on_actionColumnView_triggered()
 {
@@ -350,16 +355,11 @@ void MainWindow::on_actionColumnView_triggered()
     view_navigation->setIconSize(QSize(list_icon_size, list_icon_size));
     //    ui->widget_navigation_panel
 
-    file_system_model = new QFileSystemModel(this);
-
-
-    QString current_location = default_location;
-
 //    dirmodel->setFilter(QDir::AllDirs | QDir::NoDotAndDotDot);
 
     view_navigation->setModel(file_system_model);
-    file_system_model->setRootPath(current_location); // must be called after setModel is called
-    view_navigation->setRootIndex(file_system_model->index(current_location));
+    file_system_model->setRootPath(current_root_path); // must be called after setModel is called
+    view_navigation->setRootIndex(current_dir_index);
 
 
     auto widths = view_navigation->columnWidths();
@@ -373,7 +373,7 @@ void MainWindow::on_actionColumnView_triggered()
 
     // monitoring clicks on item
     connect(view_navigation, SIGNAL(clicked(const QModelIndex &)), this, SLOT(onTableClicked(const QModelIndex &)));
-
+    connect(view_navigation, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(onDoubleClicked(const QModelIndex &)));
 
     // finally add the navigation panel
     ui->horizontalLayout->addWidget(navigation_panel);
@@ -499,28 +499,25 @@ void MainWindow::initializeNavigationPanel()
     view_navigation->setObjectName(QString::fromUtf8("iconView"));
 
 
-    file_system_model = new QFileSystemModel(this);
 
-    QString current_location = default_location;
-
-    QModelIndex index = file_system_model->index(current_location);
-    if(index.isValid()){
+    current_dir_index = file_system_model->index(current_location);
+    if(current_dir_index.isValid()){
         qDebug() << "valid index";
     }else{
         qDebug() << "Invalid index";
     }
-    qDebug() << index.data();
+    qDebug() << current_dir_index.data();
 
 //    view_navigation->setCurrentIndex(file_system_model->index(0, 0, view_navigation->rootIndex()));
 
 //    file_system_model->setReadOnly(false); // read write is enabled
 
 
-    view_navigation->expand(index);
-    view_navigation->scrollTo(index);
-    view_navigation->setCurrentIndex(index);
+    view_navigation->expand(current_dir_index);
+    view_navigation->scrollTo(current_dir_index);
+    view_navigation->setCurrentIndex(current_dir_index);
 
-    view_navigation->resizeColumnToContents(0);
+
 
     QModelIndex current_index = view_navigation->currentIndex();
     qDebug() << "view_navigation->currentIndex() " << current_index.data();
@@ -531,15 +528,16 @@ void MainWindow::initializeNavigationPanel()
     }
 
     view_navigation->setModel(file_system_model);
-    file_system_model->setRootPath(current_location); // must be called after setModel is called
-    view_navigation->setRootIndex(file_system_model->index(current_location));
+    file_system_model->setRootPath(current_root_path); // must be called after setModel is called
+    view_navigation->setRootIndex(current_dir_index);
 
-//    file_system_model->setRootPath(current_location);
-//    view_navigation->setRootIndex(file_system_model->index(current_location));
 
+    view_navigation->setColumnWidth(0, 256);
+//    view_navigation->resizeColumnToContents(0);
 
     // monitoring clicks on item
     connect(view_navigation, SIGNAL(clicked(const QModelIndex &)), this, SLOT(onTableClicked(const QModelIndex &)));
+    connect(view_navigation, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(onDoubleClicked(const QModelIndex &)));
 
     // finally add the navigation panel
     ui->horizontalLayout->addWidget(navigation_panel);
@@ -554,7 +552,96 @@ void MainWindow::onTableClicked(const QModelIndex &index)
     if (index.isValid()) {
         QString cellText = index.data().toString();
         qDebug() << cellText;
+        qDebug() << index.parent().data().toString();
     }
+    if(file_system_model->isDir(index)){
+        current_dir_index = index;
+        current_location += "/" + index.data().toString();
+    }else{
+        selected_file_index = index;
+        qDebug() << "selected file : " << selected_file_index.data().toString();
+    }
+
+    if(currentViewMode == ViewMode::TreeView ){
+        QTreeView *  tmp  = dynamic_cast<QTreeView*>(navigation_panel);
+        // clicking on an item on tree view changes the current location
+        // assign iff it is a valid directory TODO
+
+        tmp->resizeColumnToContents(0);
+        tmp->resizeColumnToContents(1);
+    }else  if(currentViewMode == ViewMode::ListView ){
+        QTableView *  tmp = dynamic_cast<QTableView*>(navigation_panel);
+
+        tmp->resizeColumnToContents(0);
+        tmp->resizeColumnToContents(1);
+    }
+}
+
+void MainWindow::update_view_panel_all()
+{
+    if(currentViewMode == ViewMode::TreeView ){
+        QTreeView *  tmp  = dynamic_cast<QTreeView*>(navigation_panel);
+        // assign iff it is a valid directory TODO
+
+        tmp->resizeColumnToContents(0);
+        tmp->resizeColumnToContents(1);
+    }else  if(currentViewMode == ViewMode::ListView ){
+        QTableView *  tmp = dynamic_cast<QTableView*>(navigation_panel);
+        // changing the directory according to clicked
+        tmp->setRootIndex(current_dir_index);
+//        file_system_model->setRootPath(current_location); // must be called after setModel is called
+        tmp->resizeColumnToContents(0);
+        tmp->resizeColumnToContents(1);
+    }else  if(currentViewMode == ViewMode::IconView ){
+        QListView *  tmp = dynamic_cast<QListView*>(navigation_panel);
+        tmp->setRootIndex(current_dir_index);
+    }else  if(currentViewMode == ViewMode::ColumnView ){
+        QColumnView *  tmp = dynamic_cast<QColumnView*>(navigation_panel);
+        tmp->setRootIndex(current_dir_index);
+    }
+}
+
+void MainWindow::update_view_panel_on_actionParent_triggered()
+{
+    current_dir_index = current_dir_index.parent();
+    if(currentViewMode == ViewMode::ListView ){
+        QTableView *  tmp = dynamic_cast<QTableView*>(navigation_panel);
+        // changing the directory according to clicked
+        tmp->setRootIndex(current_dir_index);
+//        file_system_model->setRootPath(current_location); // must be called after setModel is called
+        tmp->resizeColumnToContents(0);
+        tmp->resizeColumnToContents(1);
+    }else  if(currentViewMode == ViewMode::IconView ){
+        QListView *  tmp = dynamic_cast<QListView*>(navigation_panel);
+        tmp->setRootIndex(current_dir_index);
+    }
+}
+
+void MainWindow::onDoubleClicked(const QModelIndex &index)
+{
+    qDebug() << "onTableClicked " << __LINE__;
+    if (index.isValid()) {
+        QString cellText = index.data().toString();
+        qDebug() << cellText;
+        qDebug() << index.parent().data().toString();
+    }else{
+        qDebug() << "invalid index "<< __LINE__;
+    }
+
+    // file or directory selected
+    if(file_system_model->isDir(index)){
+        // assign iff it is a valid directory TODO
+        current_location += "/" + index.data().toString();
+//        file_system_model->setRootPath(current_location); // must be called after setModel is called
+        current_dir_index = index;
+    }else{
+        selected_file_index = index;
+        qDebug() << "file selected : " << selected_file_index.data().toString();
+    }
+
+    // view modes. only applicable if the selected index is a directory. TODO
+    update_view_panel_all();
+
 }
 
 void MainWindow::setIconTheme()

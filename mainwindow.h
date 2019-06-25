@@ -31,6 +31,9 @@ public:
 
     void inforLayout();// information about the layout. to find bugs
 
+    void update_view_panel_all();
+    void update_view_panel_on_actionParent_triggered();
+
 private slots:
     void on_actionPrevious_triggered();
     void on_actionNext_triggered();
@@ -44,6 +47,7 @@ private slots:
 
 
     void onTableClicked(const QModelIndex &index);
+    void onDoubleClicked(const QModelIndex &index);
 
 
     void model_directoryLoaded(QString path);
@@ -55,6 +59,7 @@ private:
 
     // added by shahnoor
     QString default_location ;
+    QString current_root_path;
 
     QFileSystemModel *file_system_model;
     QDirModel *dir_model;
@@ -66,6 +71,9 @@ private:
 
 
     QString current_location; // current file system location
+    QModelIndex current_dir_index; // location to folder or directory only only
+    QString selected_file_path;
+    QModelIndex selected_file_index;
 
     QList<int> column_widths;
     int max_column_width = 64*4;
